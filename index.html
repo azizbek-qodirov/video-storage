@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Video Gallery</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .video-grid { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 20px; 
+            justify-content: center;
+        }
+        .video-container { 
+            width: 320px; 
+            margin-bottom: 20px; 
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .video-container video {
+            width: 100%;
+            display: block;
+        }
+        .video-container h3 {
+            margin: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Enhanced Video Gallery</h1>
+    <div id="videoGrid" class="video-grid"></div>
+
+    <script>
+        const videoGrid = document.getElementById('videoGrid');
+
+        function isVideoFile(filename) {
+            const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+            return videoExtensions.some(ext => filename.toLowerCase().endsWith(ext));
+        }
+
+        function createVideoPlayer(video) {
+            const videoContainer = document.createElement('div');
+            videoContainer.className = 'video-container';
+
+            const videoElement = document.createElement('video');
+            videoElement.src = `http://${video.url}`;
+            videoElement.controls = true; // Keep default controls
+
+            const title = document.createElement('h3');
+            title.textContent = video.name;
+
+            videoContainer.appendChild(videoElement);
+            videoContainer.appendChild(title);
+
+            // Double tap seeking
+            let lastTap = 0;
+            videoElement.addEventListener('click', (e) => {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+                if (tapLength < 300 && tapLength > 0) {
+                    if (e.clientX < videoElement.offsetWidth / 2) {
+                        videoElement.currentTime = Math.max(videoElement.currentTime - 5, 0);
+                    } else {
+                        videoElement.currentTime = Math.min(videoElement.currentTime + 5, videoElement.duration);
+                    }
+                }
+                lastTap = currentTime;
+            });
+
+            return videoContainer;
+        }
+
+        async function fetchVideos() {
+            try {
+                const response = await fetch('http://localhost:8088/api/v1/videos');
+                const files = await response.json();
+
+                const videos = files.filter(file => isVideoFile(file.name));
+
+                if (videos.length === 0) {
+                    videoGrid.innerHTML = '<p>No videos found.</p>';
+                    return;
+                }
+
+                console.log('Filtered videos:', videos);
+
+                videos.forEach(video => {
+                    const videoPlayer = createVideoPlayer(video);
+                    videoGrid.appendChild(videoPlayer);
+                });
+
+            } catch (error) {
+                console.error('Error fetching videos:', error);
+                videoGrid.innerHTML = '<p>Error loading videos.</p>';
+                videoGrid.innerHTML += error.message;
+            }
+        }
+
+        fetchVideos();
+    </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+basePath: /api/v1
+definitions:
+  model.Video:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      size:
+        type: integer
+      updated_at:
+        type: string
+      url:
+        type: string
+    type: object
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a simple video service API.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Video Service API
+  version: "1.0"
+paths:
+  /video/{id}:
+    delete:
+      description: Deletes a video by its unique ID.
+      parameters:
+      - description: Video ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Video deleted successfully
+          schema:
+            type: string
+        "404":
+          description: Video not found
+          schema:
+            type: string
+        "500":
+          description: Server error
+          schema:
+            type: string
+      summary: Delete a video by ID
+      tags:
+      - Videos
+    get:
+      description: Retrieves a video by its unique ID.
+      parameters:
+      - description: Video ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Video retrieved successfully
+          schema:
+            $ref: '#/definitions/model.Video'
+        "404":
+          description: Video not found
+          schema:
+            type: string
+        "500":
+          description: Server error
+          schema:
+            type: string
+      summary: Get a video by ID
+      tags:
+      - Videos
+  /video/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a new video file.
+      parameters:
+      - description: Video file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Video uploaded successfully
+          schema:
+            $ref: '#/definitions/model.Video'
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "500":
+          description: Server error
+          schema:
+            type: string
+      summary: Upload a video
+      tags:
+      - Videos
+  /videos:
+    get:
+      description: Retrieves a list of all videos.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Videos retrieved successfully
+          schema:
+            items:
+              $ref: '#/definitions/model.Video'
+            type: array
+        "500":
+          description: Server error
+          schema:
+            type: string
+      summary: Get all videos
+      tags:
+      - Videos
+swagger: "2.0"
